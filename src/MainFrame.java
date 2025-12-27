@@ -1,77 +1,103 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * 核心視窗容器：管理所有遊戲階段的切換 (AUTH, LOBBY, WAITING, GAME)
+ */
 public class MainFrame extends JFrame {
+    private CardLayout cardLayout = new CardLayout();
+    private JPanel mainContainer = new JPanel(cardLayout);
+    private GameClient client;
+
+    private AuthPanel authPanel;
+    private LobbyPanel lobbyPanel;
+    private WaitingPanel waitingPanel; // 新增：等待室面板
     private GameUI gameUI;
-    private GameClient client; 
 
     public MainFrame(GameClient client) {
         this.client = client;
-        String myId = (client != null) ? client.getMyUserName() : "測試玩家";
-        System.out.println("目前遊戲視窗載入中，玩家 ID: " + myId);
 
-        setTitle("致命數字 Fatal Number - 遊戲進行中");
+        setTitle("致命數字 Fatal Number");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // 視窗置中
+        setLocationRelativeTo(null);
 
-        // 初始化遊戲主畫面
-        // 將client傳入GameUI，這樣面板上的按鈕才能送出指令
-        gameUI = new GameUI(client, myId); 
-        this.getContentPane().add(gameUI);
+        // 初始化所有基礎面板
+        authPanel = new AuthPanel(this, client);
+        lobbyPanel = new LobbyPanel(this, client);
+        waitingPanel = new WaitingPanel(this, client); // 初始化等待室
+
+        // 將面板註冊到 CardLayout 容器中
+        mainContainer.add(authPanel, "AUTH");
+        mainContainer.add(lobbyPanel, "LOBBY");
+        mainContainer.add(waitingPanel, "WAITING"); // 註冊等待室
+
+        add(mainContainer);
+        showPanel("AUTH"); // 初始畫面設為登入
 
         setVisible(true);
     }
 
-    
-    // 當GameClient收到伺服器的UPDATE訊息時，會呼叫此方法
-    // UPDATE|currentNumber|direction|currentPlayer|playerData...
+    /**
+     * 切換顯示面板
+     */
+    public void showPanel(String name) {
+        cardLayout.show(mainContainer, name);
+    }
+
+    /**
+     * 當建立房間成功時，設定房間名稱並跳轉
+     */
+    public void setWaitingRoomName(String name) {
+        waitingPanel.setRoomName(name);
+        showPanel("WAITING");
+    }
+
+    /**
+     * 更新等待室內的玩家準備狀態
+     * 
+     * @param data 格式通常為 "Player1:Ready;Player2:Waiting"
+     */
+    public void updateWaitingStatus(String data) {
+        waitingPanel.updateStatus(data);
+        showPanel("WAITING"); // 確保畫面切換到等待室
+    }
+
+    /**
+     * 遊戲正式開始，載入遊戲主 UI
+     */
+    public void enterGame(String myId) {
+        // 每次進入遊戲重新初始化 GameUI，確保數據乾淨
+        gameUI = new GameUI(client, myId);
+        mainContainer.add(gameUI, "GAME");
+        showPanel("GAME");
+    }
+
+    /**
+     * 處理遊戲進行中的 UI 更新訊息
+     */
     public void updateUI(String message) {
-        // 將字串傳遞給底層的 GameUI 進行解析與渲染
-        gameUI.updateGameScreen(message);
+        if (gameUI != null) {
+            gameUI.updateGameScreen(message);
+        }
     }
 
+    /**
+     * 更新大廳的房間列表
+     */
+    public void addRoom(String id, String name, int count) {
+        lobbyPanel.addRoomToList(id, name, count);
+    }
 
-    // 當GameClient收到伺服器的WINNER訊息時，會呼叫此方法
-    // WINNER|winnerId|deathHistory
+    /**
+     * 顯示遊戲結束結算對話框
+     */
     public void triggerWinnerDialog(String message) {
-        // 拆解字串：WINNER|贏家ID|遺言清單
         String[] parts = message.split("\\|");
-        if (parts.length < 3) return;
+        if (parts.length < 3)
+            return;
 
-        String winnerId = parts[1];
-        String deathHistory = parts[2];
-
-        // 顯示結算視窗
-        new WinnerDialog(this, winnerId, deathHistory, client).setVisible(true);
+        // WinnerDialog 結束後會透過 client.backToLobby() 回到大廳面板
+        new WinnerDialog(this, parts[1], parts[2], client).setVisible(true);
     }
-
-    // 測試區
-    
-    public static void main(String[] args) {
-        MainFrame frame = new MainFrame(null);
-        
-        Timer timer = new Timer(1500, e -> {
-            /* 
-             * UPDATE | 數字 | 方向 | 當前玩家 | 玩家清單 | 輪數
-             * * 模擬場景：
-             * - 目前數字：10 (快到13了，按鈕應該會變紅)
-             * - 方向：CW (順時針)
-             * - 當前玩家：測試玩家(我的回合，按鈕應啟用)
-             * - 玩家清單：包含存活狀態與陷阱遮罩
-             * - 輪數：3
-             */
-            String mockData = "UPDATE|10|CW|測試玩家|測試玩家:1:?;Player1:1:5;Player2:1:11;Player3:0:3|3";
-            
-            System.out.println(">>> 收到模擬數據 (含輪數): " + mockData);
-            frame.updateUI(mockData);
-        });
-        
-        timer.setRepeats(false);
-        timer.start();
-    }
-    
-    
-    
-    
 }

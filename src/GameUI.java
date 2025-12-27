@@ -40,7 +40,7 @@ public class GameUI extends JPanel {
             if (remainingSeconds >= 0) {
                 timerLabel.setText("0:" + String.format("%02d", remainingSeconds));
                 
-                // 💡 倒數 5 秒內變紅色警告
+                // 倒數 5 秒內變紅色警告
                 if (remainingSeconds <= 5) {
                     timerLabel.setForeground(Color.RED);
                 } else {
@@ -76,7 +76,7 @@ public class GameUI extends JPanel {
         
 
         // 牌堆圖片路徑修正與縮放
-        ImageIcon originalDeck = new ImageIcon("src/resources/cards_img/card_back.png");
+        ImageIcon originalDeck = new ImageIcon("resources/cards_img/card_back.png");
         Image scaledDeckImg = originalDeck.getImage().getScaledInstance(100, 140, Image.SCALE_SMOOTH);
         JLabel deckLabel = new JLabel(new ImageIcon(scaledDeckImg));
 
@@ -121,7 +121,7 @@ public class GameUI extends JPanel {
         btn.setFocusPainted(false);
 
         btn.addActionListener(e -> {
-            // 💡 這裡改成陳姿吟的 sendMessage
+            // 這裡改成陳姿吟的 sendMessage
             String cmd = String.format("ACTION|%s|%s|%s", myId, type, value);
             if (client != null) {
                 client.sendMessage(cmd);

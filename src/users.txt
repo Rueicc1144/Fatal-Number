@@ -1,6 +1,5 @@
 a:1
 testuser:password123
-A1113368:nuk_oop
 s:1
 d:1
 f:1

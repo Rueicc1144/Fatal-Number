@@ -10,15 +10,15 @@ public class PlayerPanel extends JPanel {
     private static final int CARD_WIDTH = 100;
     private static final int CARD_HEIGHT = 140;
     
-    private final String IMG_PATH = "cards_img/"; 
-
+    private final String IMG_PATH = "resources/cards_img/";
+    
     public PlayerPanel(String playerId) {
         this.setOpaque(false);
         this.setLayout(new BorderLayout(0, 5));
         this.setPreferredSize(new Dimension(120, 180));
 
         this.scaledCardBackIcon = loadAndScale(IMG_PATH + "card_back.png");
-        
+                
         cardLabel = new JLabel(scaledCardBackIcon);
         cardLabel.setHorizontalAlignment(JLabel.CENTER);
 
