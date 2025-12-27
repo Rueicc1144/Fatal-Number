@@ -4,7 +4,7 @@
 `GameServer.java`
 
 ## Client遊玩執行程式碼
-`main.java`
+`Main.java`
 
 ## 使用的設計模式
 1. Factory Pattern
