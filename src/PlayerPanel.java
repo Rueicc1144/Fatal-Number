@@ -87,4 +87,6 @@ public class PlayerPanel extends JPanel {
         }
         return name + "_of_spades.png";
     }
+
 }
+
