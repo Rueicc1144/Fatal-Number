@@ -10,7 +10,7 @@ public class PlayerPanel extends JPanel {
     private static final int CARD_WIDTH = 100;
     private static final int CARD_HEIGHT = 140;
     
-    private final String IMG_PATH = "cards_img/"; 
+    private final String IMG_PATH = "src/resources/cards_img/"; 
 
     public PlayerPanel(String playerId) {
         this.setOpaque(false);
@@ -87,4 +87,5 @@ public class PlayerPanel extends JPanel {
         }
         return name + "_of_spades.png";
     }
+
 }
